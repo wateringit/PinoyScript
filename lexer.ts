@@ -81,6 +81,6 @@ export function tokenize (sourceCode: string) : Token[] {
       }
     }
   }
-  tokens.push({ type: TokenTYpe.EOF, value: "EndOfFile" });
+  tokens.push({ type: TokenType.EOF, value: "EndOfFile" });
   return tokens;
 }

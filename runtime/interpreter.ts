@@ -1,4 +1,4 @@
-import { ValueType, RuntimeVal, NullVal, NumberVal } from "./values.ts";
+import { RuntimeVal, NullVal, NumberVal } from "./values.ts";
 import { NumericLiteral, Stmt, BinaryExpr } from "../frontend/ast.ts";
 
 function evaluate_program (program: Program): RuntimeVal {
@@ -9,7 +9,7 @@ function evaluate_program (program: Program): RuntimeVal {
   return lastEvaluated;
 }
 
-function eval_numeric_binary_expr(lhs: NumberVal, rhs: NumberVal, operator: string): NumberVal {
+function evaluate_numeric_binary_expr(lhs: NumberVal, rhs: NumberVal, operator: string): NumberVal {
   let result: number;
   if (operator == "+") {
     result = lhs.value + rhs.value;
@@ -24,7 +24,7 @@ function eval_numeric_binary_expr(lhs: NumberVal, rhs: NumberVal, operator: stri
     result = lhs.value % rhs.value;
   }
 
-  return { value: result, type: number };
+  return { value: result, type: "number" };
 }
 function evaluate_binary_expr (binop: BinaryExpr): RuntimeVal {
 
@@ -32,7 +32,7 @@ function evaluate_binary_expr (binop: BinaryExpr): RuntimeVal {
   const rhs = evaluate(binop.right);
 
   if (lhs.type == "number" && rhs.type == "number") {
-    return eval_numeric_binary_expr(lhs as NumberVal, rhs as NumberVal, binop.operator);
+    return evaluate_numeric_binary_expr(lhs as NumberVal, rhs as NumberVal, binop.operator);
   }
   // One or both values are Null
   return { type: "null", value: "null" } as NullVal;

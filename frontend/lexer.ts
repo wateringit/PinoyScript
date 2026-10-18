@@ -1,8 +1,8 @@
 export enum TokenType {
   // Literal Types 
-  Null,
   Number,
   Identifier,
+  String,
   // Grouping + Operators
   Equals,
   OpenParen,
@@ -12,11 +12,13 @@ export enum TokenType {
 
   // Keywords
   Let,
+  Const,
 }
 
 const KEYWORDS: Record<string, TokenType> = {
   si: TokenType.Let,
-  wala: TokenType.Null,
+  tlga: TokenType.Const,
+  wala: TokenType.Identifier,
 };
 
 export interface Token {

@@ -50,7 +50,7 @@ export function evaluate (astNode: Stmt): RuntimeVal {
     case "BinaryExpr":
       return evaluate_binary_expr(astNode as BinaryExpr);
     case "Program":
-      return eval_program(astNode as Program);
+      return evaluate_program(astNode as Program);
     default:
       console.error("Unrecognized AST Node" , astNode);
       Deno.exit(0);

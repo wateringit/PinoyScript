@@ -98,7 +98,7 @@ export default class Parser {
 
       case TokenType.Number:
         return {
-          kind: "NumbericLiteral", 
+          kind: "NumericLiteral", 
           value: parseFloat(this.eat().value) 
         } as NumericLiteral;
         

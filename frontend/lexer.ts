@@ -5,6 +5,7 @@ export enum TokenType {
   String,
   // Grouping + Operators
   Equals,
+  Semicolon,
   OpenParen,
   CloseParen,
   BinaryOperator,
@@ -19,6 +20,7 @@ const KEYWORDS: Record<string, TokenType> = {
   si: TokenType.Let,
   tlga: TokenType.Const,
   wala: TokenType.Identifier,
+  ay: TokenType.Equals,
 };
 
 export interface Token {
@@ -56,6 +58,8 @@ export function tokenize (sourceCode: string) : Token[] {
       tokens.push(token(src.shift(), TokenType.BinaryOperator));
     } else if (src[0] == "=") {
       tokens.push(token(src.shift(), TokenType.Equals));
+    } else if (src[0] == ";") {
+      tokens.push(token(src.shift(), TokenType.Semicolon));
     } else {
       // Handle multichar tokens
       if (isint(src[0])) {

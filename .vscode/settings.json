@@ -1,4 +1,14 @@
 {
   "deno.enable": true,
-  "deno.lint": true
+  "deno.lint": true,
+  "deno.suggest.imports.autoDiscover": true,
+  "deno.suggest.imports.hosts": {
+    "https://deno.land": true,
+    "https://esm.sh": true
+  },
+  "editor.codeActionsOnSave": {
+    "source.addMissingImports": "always",
+    "source.organizeImports": "always"
+  },
+  "js/ts.validate.enabled": false
 }

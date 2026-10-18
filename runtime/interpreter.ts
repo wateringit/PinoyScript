@@ -1,48 +1,9 @@
-import { RuntimeVal, NumberVal, MK_NULL } from "./values.ts";
-import { NumericLiteral, Stmt, BinaryExpr, Identifier, Program } from "../frontend/ast.ts";
-import Environment from "./environment.ts"
+import { BinaryExpr, Identifier, NumericLiteral, Program, Stmt, VarDeclaration } from "../frontend/ast.ts";
+import Environment from "./environment.ts";
+import { evaluate_binary_expr, evaluate_identifier } from "./eval/expressions.ts";
+import { evaluate_program, evaluate_var_declaration } from "./eval/statements.ts";
+import { NumberVal, RuntimeVal } from "./values.ts";
 
-function evaluate_program(program: Program, env: Environment): RuntimeVal {
-  let lastEvaluated: RuntimeVal = MK_NULL();
-  for (const statement of program.body) {
-    lastEvaluated = evaluate(statement, env);
-  }
-  return lastEvaluated;
-}
-
-function evaluate_numeric_binary_expr(lhs: NumberVal, rhs: NumberVal, operator: string,): NumberVal {
-  let result: number;
-  if (operator == "+") {
-    result = lhs.value + rhs.value;
-  } else if (operator == "-") {
-    result = lhs.value - rhs.value;
-  } else if (operator == "*") {
-    result = lhs.value * rhs.value;
-  } else if (operator == "/") {
-    // TODO: Division by zero checks
-    result = lhs.value / rhs.value;
-  } else {
-    result = lhs.value % rhs.value;
-  }
-
-  return { value: result, type: "number" };
-}
-function evaluate_binary_expr(binop: BinaryExpr, env: Environment): RuntimeVal {
-
-  const lhs = evaluate(binop.left, env);
-  const rhs = evaluate(binop.right, env);
-
-  if (lhs.type == "number" && rhs.type == "number") {
-    return evaluate_numeric_binary_expr(lhs as NumberVal, rhs as NumberVal, binop.operator);
-  }
-  // One or both values are Null
-  return MK_NULL();
-}
-
-function evaluate_identifier(identifier: Identifier, env: Environment): RuntimeVal {
-  const val = env.lookupVar(identifier.symbol);
-  return val;
-}
 
 export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
   switch (astNode.kind) {
@@ -57,6 +18,9 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
       return evaluate_binary_expr(astNode as BinaryExpr, env);
     case "Program":
       return evaluate_program(astNode as Program, env);
+    // Handle Statements
+    case "VarDeclaration":
+      return evaluate_var_declaration(astNode as VarDeclaration, env);
     default:
       console.error("Unrecognized AST Node" , astNode);
       Deno.exit(0);

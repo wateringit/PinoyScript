@@ -15,7 +15,7 @@ export enum TokenType {
 }
 
 const KEYWORDS: Record<string, TokenType> = {
-  si : TokenType.Let,
+  si: TokenType.Let,
   wala: TokenType.Null,
 };
 

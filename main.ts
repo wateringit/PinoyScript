@@ -1,11 +1,17 @@
 import Parser from "./frontend/parser.ts";
 import Environment from "./runtime/environment.ts";
 import { evaluate } from "./runtime/interpreter.ts";
+import { MK_BOOL, MK_NULL } from "./runtime/values.ts";
 repl();
 
 function repl () {
   const parser = new Parser();
   const env = new Environment();
+
+  // Default Global Environment
+  env.declareVar("tama", MK_BOOL(true), true);
+  env.declareVar("mali", MK_BOOL(false), false);
+  env.declareVar("wala", MK_NULL(), true);
   console.log("\n REPL v1")
   while (true) {
     const input = prompt(">");

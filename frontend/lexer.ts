@@ -19,7 +19,6 @@ export enum TokenType {
 const KEYWORDS: Record<string, TokenType> = {
   si: TokenType.Let,
   tlga: TokenType.Const,
-  wala: TokenType.Identifier,
   ay: TokenType.Equals,
 };
 

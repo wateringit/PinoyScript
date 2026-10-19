@@ -12,9 +12,10 @@ export enum TokenType {
   CloseParen,
   OpenBrace,
   CloseBrace,
+  OpenBracket,
+  CloseBracket,
   BinaryOperator,
   EOF, // End of File
-
   // Keywords
   Let,
   Const,

@@ -1,4 +1,4 @@
-import { BinaryExpr, Identifier } from "../../frontend/ast.ts";
+import { AssignmentExpr, BinaryExpr, Identifier } from "../../frontend/ast.ts";
 import Environment from "../environment.ts";
 import { evaluate } from "../interpreter.ts";
 import { MK_NULL, NumberVal, RuntimeVal } from "../values.ts";
@@ -36,4 +36,12 @@ export function evaluate_binary_expr(binop: BinaryExpr, env: Environment): Runti
 export function evaluate_identifier(identifier: Identifier, env: Environment): RuntimeVal {
   const val = env.lookupVar(identifier.symbol);
   return val;
+}
+
+export function evaluate_assignments(node: AssignmentExpr, env: Environment): RuntimeVal {
+  if (node.assigne.kind !== "Identifier") {
+    throw `Invalid Left-Hand Side inside assignment expression ${JSON.stringify(node.assigne)}`;
+  }
+  const varname = (node.assigne as Identifier).symbol;
+  return env.assignVar(varname, evaluate(node.value, env));
 }

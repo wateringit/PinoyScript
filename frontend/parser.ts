@@ -1,4 +1,4 @@
-import { BinaryExpr, Expr, NumericLiteral, Program, Stmt, VarDeclaration } from "./ast.ts";
+import { AssignmentExpr, BinaryExpr, Expr, Identifier, NumericLiteral, Program, Stmt, VarDeclaration } from "./ast.ts";
 import { Token, tokenize, TokenType } from "./lexer.ts";
 
 
@@ -7,11 +7,11 @@ export default class Parser {
   
   // Checks if the program is at end of file (EOF)
   private not_eof (): boolean {
-    return this.tokens[0].type !=  TokenType.EOF;
+    return this.tokens[0].type != TokenType.EOF;
   }
 
   private at() {
-    return this.tokens[0] as TokenType.EOF;
+    return this.tokens[0] as Token;
   }
 
   private eat() {
@@ -19,7 +19,7 @@ export default class Parser {
     return prev;
   }
 
-  private expect(type: TokenType, err: any) {
+  private expect(type: TokenType, err: unknown) {
     const prev = this.tokens.shift() as Token;
     if (!prev || prev.type != type) {
       console.error("Parser Error:\n", err , prev, "Expecting: ", type);
@@ -74,7 +74,19 @@ export default class Parser {
   }
 
   private parse_expr(): Expr {
-    return this.parse_additive_expr();
+    return this.parse_assignment_expr();
+  }
+
+  // Variable declaration has lowest precedance, hence it goes first
+  private parse_assignment_expr(): Expr {
+    const left = this.parse_additive_expr(); 
+    if (this.at().type == TokenType.Equals) {
+      this.eat(); // advance past equal token
+      const value = this.parse_assignment_expr();
+      return { value, assigne: left, kind: "AssignmentExpr" } as AssignmentExpr;
+    }
+
+    return left;
   }
 
   private parse_additive_expr (): Expr {

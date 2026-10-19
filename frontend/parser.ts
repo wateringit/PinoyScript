@@ -1,4 +1,4 @@
-import { AssignmentExpr, BinaryExpr, Expr, Identifier, NumericLiteral, Program, Stmt, VarDeclaration } from "./ast.ts";
+import { AssignmentExpr, BinaryExpr, Expr, Identifier, NumericLiteral, ObjectLiteral, Program, Property, Stmt, VarDeclaration } from "./ast.ts";
 import { Token, tokenize, TokenType } from "./lexer.ts";
 
 
@@ -79,7 +79,7 @@ export default class Parser {
 
   // Variable declaration has lowest precedance, hence it goes first
   private parse_assignment_expr(): Expr {
-    const left = this.parse_additive_expr(); 
+    const left = this.parse_object_expr(); 
     if (this.at().type == TokenType.Equals) {
       this.eat(); // advance past equal token
       const value = this.parse_assignment_expr();
@@ -87,6 +87,39 @@ export default class Parser {
     }
 
     return left;
+  }
+
+  private parse_object_expr(): Expr {
+    if (this.at().type !== TokenType.OpenBrace) {
+      return this.parse_additive_expr();
+    }
+
+    this.eat();
+    const properties = new Array<Property>();
+    
+    while (this.not_eof() && this.at().type != TokenType.CloseBrace) {
+      const key = this.expect(TokenType.Identifier, "Object literal key expected").value;
+      // Allows shorthand key: pair to key,
+      if (this.at().type == TokenType.Comma) {
+        this.eat(); // go past the comma
+        properties.push({ key, kind: "Property" } as Property);
+        continue;
+      } else if (this.at().type == TokenType.CloseBrace) {
+        properties.push({ key, kind: "Property" });
+        continue;
+      }
+      // { key: value }
+      this.expect(TokenType.Colon, "Missing colon follwing identifier in Object Expression");
+      const value = this.parse_expr();
+
+      properties.push({ kind: "Property", value, key });
+      if (this.at().type != TokenType.CloseBrace) {
+        this.expect(TokenType.Comma, "Expected Comma or closing brace following Property");
+      }
+    }
+
+    this.expect(TokenType.CloseBrace, "Object missing closing brace");
+    return { kind: "ObjectLiteral", properties } as ObjectLiteral;
   }
 
   private parse_additive_expr (): Expr {

@@ -1,4 +1,4 @@
-import { MK_BOOL, MK_NATIVE_FN, MK_NULL, MK_NUMBER, NativeFunction, NumberVal, RuntimeVal, StringVal } from './values.ts';
+import { BooleanVal, MK_BOOL, MK_NATIVE_FN, MK_NULL, MK_NUMBER, NativeFunction, NumberVal, RuntimeVal, StringVal } from './values.ts';
 
 export function createGlobalEnv() {
   const env = new Environment;
@@ -80,6 +80,26 @@ export function createGlobalEnv() {
   };
   
   env.declareVar("bilang", toNumberFunc, true); // 'numero' = number
+  const toStrFunc: NativeFunction = {
+    type: "native-function",
+    call: (args: RuntimeVal[]) => {
+      const val = args[0];
+      if (!val) return { type: "string", value: "" };
+
+      switch (val.type) {
+        case "string":
+          return val as StringVal;
+        case "number":
+          return { type: "string", value: String((val as NumberVal).value) };
+        case "boolean":
+          return { type: "string", value: String((val as BooleanVal).value) };
+        default:
+          return { type: "string", value: "[Object]" };
+      }
+    }
+  };
+
+  env.declareVar("teksto", toStrFunc, true); // 'teksto' = text/string
   return env;
 
 }

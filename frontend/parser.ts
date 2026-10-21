@@ -280,7 +280,7 @@ export default class Parser {
   private parse_multiplicative_expr (): Expr {
     let left = this.parse_exponential_expr();
 
-    while (this.at().value == "*" || this.at().value == "/" || this.at().value == "%") {
+    while (this.at().value == "*" || this.at().value == "/" || this.at().value == "%" || this.at().type == TokenType.IntegerDiv) {
       const operator = this.eat().value;
       const right = this.parse_exponential_expr();
       left = {

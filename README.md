@@ -42,7 +42,7 @@ tlga a ay 20;
 - `*` to multiply
 - `/` to divide (floating point division)
 - `//` to perform integer division
-- `**` to exponetiate
+- `**` to exponentiate
 - `%` to perform modular arithmetic
 #### Comparison Operators
 - `==` for equality comparison

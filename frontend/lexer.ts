@@ -16,6 +16,7 @@ export enum TokenType {
   OpenBracket,
   CloseBracket,
   BinaryOperator,
+  IntegerDiv,
   Return,
   EOF, // End of File
   // Keywords
@@ -82,6 +83,9 @@ export function tokenize (sourceCode: string) : Token[] {
     } else if (src[0] == "*" && src[1] == "*") {
       const op = (src.shift() || "") + (src.shift() || "");
       tokens.push(token(op, TokenType.BinaryOperator));
+    } else if (src[0] == "/" && src[1] == "/") {
+      src.shift(); src.shift();
+      tokens.push(token("//", TokenType.IntegerDiv));
     } else if (src[0] == "+" || src[0] == "-" || src[0] == "*" || src[0] == "/" || src[0] == "%") {
       tokens.push(token(src.shift(), TokenType.BinaryOperator));
     } else if ((src[0] == "<" || src[0] == ">" || src[0] == "!" || src[0] == "=") && src[1] == "=") {

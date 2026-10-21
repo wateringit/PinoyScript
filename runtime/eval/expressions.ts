@@ -30,6 +30,8 @@ export function evaluate_numeric_binary_expr(
     result = numLhs * numRhs;
   } else if (operator == "/") {
     result = numLhs / numRhs;
+  } else if (operator == "//") {
+    result = Math.floor(numLhs / numRhs);
   } else if (operator == "**") {
     result = numLhs ** numRhs;
   } else if (operator == "%") {
@@ -53,7 +55,7 @@ export function evaluate_binary_expr(
   env: Environment,
 ): RuntimeVal {
   // Handle arithmetic & exponential operations
-  if (["+", "-", "*", "/", "%", "**"].includes(binop.operator)) {
+  if (["+", "-", "*", "/", "%", "**", "//"].includes(binop.operator)) {
     const left = evaluate(binop.left, env);
     const right = evaluate(binop.right, env);
     if (left.type === "number" && right.type === "number" || (binop.operator === "+" && (left.type === "string" || right.type === "string"))) {

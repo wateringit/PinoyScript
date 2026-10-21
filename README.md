@@ -153,3 +153,6 @@ pinakamalaki(1,3,2) // Outputs 3
 ```
 
 More Features to come! PinoyScript doesn't support lists or the like yet :(, this will depend on my motivation :D.
+
+## WIP features
+Post and pre-incrementor, and more built-in functions if I feel like it

@@ -51,6 +51,9 @@ tlga a ay 20;
 - `>` for greater than
 - `<` for less than
 - `!=` for not equal to
+#### Augmented Operators
+- `+=`, `-=`, `*=`, `/=`, and `%=` are supported
+> Note: Even if `ay` can be used to assign values to variables, it is invalid to say `+ay` and the like for augmented operators
 ### Conditionals
 - `kung` for if
 - `edi kung` for else if
@@ -69,17 +72,42 @@ kung (condition) {
 ### Loops and Iteration
 - `habang` for `while` loops
 - `para` for `for` loops
-Example
+
+Example:
 ```ts
 habang (condition) {
   // foo
 }
-para (si i = 0; i < 20; i = i + 1) {
+para (si i = 0; i < 20; i += 1) {
   // bar
 }
 ```
+- `tuloy` to skip the iteration
+- `hinto` to break the loop
 
-
+Example: 
+```ts 
+para (si i = 0; i < 20; i += 1) {
+  kung (i == 5) {
+    hinto;
+  } edi {
+    tuloy;
+  }
+}
+```
+### Functions
+`paraan` is used to declare functions like this:
+```ts
+paraan test_func(args) {
+  // foo
+}
+```
+`balik` is used to return a value
+```ts
+paraan test_func(args) {
+  balik args;
+}
+```
 ## Built-in Functions
 
 Here is an example script in PinoyScript:

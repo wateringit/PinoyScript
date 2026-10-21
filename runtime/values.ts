@@ -68,6 +68,9 @@ export class ReturnSignal {
   constructor(public value: RuntimeVal) {}
 }
 
+export class BreakSignal {}
+export class ContinueSignal {}
+
 export interface NativeFunction {
   type: "native-function";
   call: (args: RuntimeVal[]) => RuntimeVal;

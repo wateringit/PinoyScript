@@ -2,7 +2,7 @@ import { AssignmentExpr, AugmentedAssignmentExpr, BinaryExpr, CallExpr, ForStmt,
 import Environment from "./environment.ts";
 import { evaluate_assignments, evaluate_binary_expr, evaluate_call_expr, evaluate_identifier, evaluate_object_expr, evaluate_string_expr } from "./eval/expressions.ts";
 import { evaluate_for_stmt, evaluate_function_declaration, evaluate_if_statement, evaluate_program, evaluate_return_stmt, evaluate_var_declaration, evaluate_while_stmt } from "./eval/statements.ts";
-import { NumberVal, RuntimeVal } from "./values.ts";
+import { BreakSignal, ContinueSignal, NumberVal, RuntimeVal } from "./values.ts";
 
 
 export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
@@ -41,6 +41,10 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
       return evaluate_for_stmt(astNode as ForStmt, env);
     case "IfStmt":
       return evaluate_if_statement(astNode as IfStmt, env);
+    case "BreakStmt":
+      throw new BreakSignal();
+    case "ContinueStmt":
+      throw new ContinueSignal();
     default:
       console.error("Unrecognized AST Node" , astNode);
       Deno.exit(0);

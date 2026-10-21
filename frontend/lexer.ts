@@ -27,6 +27,8 @@ export enum TokenType {
   For,
   Else,
   If,
+  Break,
+  Continue,
 }
 
 const KEYWORDS: Record<string, TokenType> = {
@@ -39,6 +41,8 @@ const KEYWORDS: Record<string, TokenType> = {
   para: TokenType.For,
   kung: TokenType.If,
   edi: TokenType.Else,
+  hinto: TokenType.Break,
+  tuloy: TokenType.Continue,
 };
 
 export interface Token {

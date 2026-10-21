@@ -1,7 +1,7 @@
 import { ForStmt, FunctionDeclaration, IfStmt, Program, ReturnStmt, VarDeclaration, WhileStmt } from "../../frontend/ast.ts";
 import Environment from '../environment.ts';
 import { evaluate } from '../interpreter.ts';
-import { BooleanVal, FunctionValue, MK_NULL, NumberVal, ReturnSignal, RuntimeVal, StringVal } from '../values.ts';
+import { BooleanVal, BreakSignal, ContinueSignal, FunctionValue, MK_NULL, NumberVal, ReturnSignal, RuntimeVal, StringVal } from '../values.ts';
 
 export function evaluate_program(program: Program, env: Environment): RuntimeVal {
   let lastEvaluated: RuntimeVal = MK_NULL();
@@ -37,24 +37,50 @@ export function evaluate_return_stmt(stmt: ReturnStmt, env: Environment): Runtim
 
 
 export function evaluate_while_stmt(stmt: WhileStmt, env: Environment): RuntimeVal {
-  while (is_truthy(evaluate(stmt.condition, env))) {
-    const scope = new Environment(env); // fresh scope per iteration
-    for (const s of stmt.body) evaluate(s, scope);
+    while (is_truthy(evaluate(stmt.condition, env))) {
+      try {
+        const scope = new Environment(env);
+        for (const s of stmt.body) {
+          evaluate(s, scope);
+        }
+      } catch (signal) {
+        if (signal instanceof BreakSignal) {
+          break;
+        }
+        if (signal instanceof ContinueSignal) {
+          continue;
+        }
+        throw signal;
+      }
+    }
+    return MK_NULL();
   }
-  return MK_NULL();
-}
 
 export function evaluate_for_stmt(stmt: ForStmt, env: Environment): RuntimeVal {
-  const loopEnv = new Environment(env); // holds the loop variable
-  if (stmt.init) evaluate(stmt.init, loopEnv);
+    const loopEnv = new Environment(env);
+    if (stmt.init) evaluate(stmt.init, loopEnv);
 
-  while (!stmt.condition || is_truthy(evaluate(stmt.condition, loopEnv))) {
-    const scope = new Environment(loopEnv); // fresh scope per iteration
-    for (const s of stmt.body) evaluate(s, scope);
-    if (stmt.update) evaluate(stmt.update, loopEnv);
+    while (!stmt.condition || is_truthy(evaluate(stmt.condition, loopEnv))) {
+      try {
+        const scope = new Environment(loopEnv);
+        for (const s of stmt.body) {
+          evaluate(s, scope);
+        }
+      } catch (signal) {
+        if (signal instanceof BreakSignal) {
+          break; 
+        }
+        if (signal instanceof ContinueSignal) {
+          if (stmt.update) evaluate(stmt.update, loopEnv);
+          continue;
+        }
+        throw signal;
+      }
+
+      if (stmt.update) evaluate(stmt.update, loopEnv);
+    }
+    return MK_NULL();
   }
-  return MK_NULL();
-}
 
 export function evaluate_if_statement(
   statement: IfStmt,

@@ -1,4 +1,4 @@
-import { AssignmentExpr, AugmentedAssignmentExpr, BinaryExpr, CallExpr, Expr, ForStmt, FunctionDeclaration, Identifier, IfStmt, MemberExpr, NumericLiteral, ObjectLiteral, Program, Property, ReturnStmt, Stmt, StringLiteral, VarDeclaration, WhileStmt } from "./ast.ts";
+import { AssignmentExpr, AugmentedAssignmentExpr, BinaryExpr, BreakStmt, CallExpr, ContinueStmt, Expr, ForStmt, FunctionDeclaration, Identifier, IfStmt, MemberExpr, NumericLiteral, ObjectLiteral, Program, Property, ReturnStmt, Stmt, StringLiteral, VarDeclaration, WhileStmt } from "./ast.ts";
 import { Token, tokenize, TokenType } from "./lexer.ts";
 
 
@@ -57,6 +57,10 @@ export default class Parser {
         return this.parse_while_stmt();
       case TokenType.For:
         return this.parse_for_stmt();
+      case TokenType.Break:
+        return this.parse_break_stmt();
+      case TokenType.Continue:
+        return this.parse_continue_stmt();
       // deno-lint-ignore no-case-declarations
       default:
         const expr =  this.parse_expr();
@@ -135,6 +139,18 @@ export default class Parser {
 
     const body = this.parse_block();
     return { kind: "ForStmt", init, condition, update, body } as ForStmt;
+  }
+
+  private parse_break_stmt(): Stmt {
+    this.eat();
+    this.expect(TokenType.Semicolon, "Expected ';' after break statement");
+    return { kind: "BreakStmt" } as BreakStmt;
+  }
+
+  private parse_continue_stmt(): Stmt {
+    this.eat();
+    this.expect(TokenType.Semicolon, "Expected ';' after continue statement");
+    return { kind: "ContinueStmt" } as ContinueStmt;
   }
   private parse_if_stmt(): Stmt {
       this.eat(); // Consume 'kung' 

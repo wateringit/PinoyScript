@@ -7,6 +7,8 @@ export type NodeType =
   | "WhileStmt"
   | "IfStmt"
   | "ForStmt"
+  | "BreakStmt"
+  | "ContinueStmt"
   // Expressions
   | "AssignmentExpr"
   | "MemberExpr"
@@ -130,4 +132,12 @@ export interface AugmentedAssignmentExpr extends Expr {
   assigne: Expr;
   operator: string;
   value: Expr;
+}
+
+export interface BreakStmt extends Stmt {
+  kind: "BreakStmt";
+} 
+
+export interface ContinueStmt extends Stmt {
+  kind: "ContinueStmt";
 }

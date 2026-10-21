@@ -1,0 +1,6 @@
+si x ay numero(pasok("Binigyan ng age: "));
+kung (x >= 18) {
+  sabi("adult");
+} edi {
+  sabi("bata");
+}

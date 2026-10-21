@@ -1,4 +1,4 @@
-import { MK_BOOL, MK_NATIVE_FN, MK_NULL, MK_NUMBER, NumberVal, RuntimeVal } from './values.ts';
+import { MK_BOOL, MK_NATIVE_FN, MK_NULL, MK_NUMBER, NativeFunction, NumberVal, RuntimeVal, StringVal } from './values.ts';
 
 export function createGlobalEnv() {
   const env = new Environment;
@@ -35,7 +35,53 @@ export function createGlobalEnv() {
     return MK_NUMBER(result);
   }
   env.declareVar("pinakamalaki", MK_NATIVE_FN(max), true);
+
+  const inputFunc: NativeFunction = {
+    type: "native-function",
+    call: (args: RuntimeVal[]) => {
+      let promptText = "";
+
+      // 1. Handle the custom prompt argument
+      if (args.length > 0) {
+        const firstArg = args[0];
+
+        if (firstArg.type === "string") {
+          // User passed: input("Enter your name: ")
+          promptText = (firstArg as StringVal).value;
+        } else if (firstArg.type === "number") {
+          // User passed: input(123)
+          promptText = String((firstArg as NumberVal).value);
+        } else {
+          promptText = "";
+        }
+      } else {
+        promptText = "";
+      }
+      const response = prompt(promptText);
+      return {
+        type: "string",
+        value: response || ""
+      };
+    }
+  };
+
+  env.declareVar("pasok", inputFunc, true);
+
+  const toNumberFunc: NativeFunction = {
+    type: "native-function",
+    call: (args: RuntimeVal[]) => {
+      const val = args[0];
+      if (val && val.type === "string") {
+        const parsed = parseFloat((val as StringVal).value);
+        return { type: "number", value: isNaN(parsed) ? 0 : parsed };
+      }
+      return { type: "number", value: 0 };
+    }
+  };
+  
+  env.declareVar("bilang", toNumberFunc, true); // 'numero' = number
   return env;
+
 }
 export default class Environment {
   private parent?: Environment;

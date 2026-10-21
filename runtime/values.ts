@@ -67,3 +67,8 @@ export interface FunctionValue extends RuntimeVal {
 export class ReturnSignal {
   constructor(public value: RuntimeVal) {}
 }
+
+export interface NativeFunction {
+  type: "native-function";
+  call: (args: RuntimeVal[]) => RuntimeVal;
+}

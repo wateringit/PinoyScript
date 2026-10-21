@@ -1,0 +1,8 @@
+si x ay bilang(pasok("Give me a number: "));
+kung (x > 10) {
+  sabi(x);
+} edi kung (x == 5) {
+  sabi(x+1);
+} edi {
+  sabi("wala");
+}

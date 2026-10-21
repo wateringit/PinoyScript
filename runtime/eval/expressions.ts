@@ -1,4 +1,4 @@
-import { AssignmentExpr, BinaryExpr, CallExpr, Identifier, ObjectLiteral, StringLiteral } from "../../frontend/ast.ts";
+import { AssignmentExpr, AugmentedAssignmentExpr, BinaryExpr, CallExpr, Identifier, ObjectLiteral, StringLiteral } from "../../frontend/ast.ts";
 import Environment from "../environment.ts";
 import { evaluate } from "../interpreter.ts";
 import { FunctionValue, MK_NULL, MK_NUMBER, MK_STRING, NativeFunctionValue, NumberVal, ObjectVal, ReturnSignal, RuntimeVal, StringVal } from "../values.ts";
@@ -79,7 +79,6 @@ function evaluate_comparison_expr(
   right: RuntimeVal,
   operator: string,
 ): RuntimeVal {
-  // Cast to any or your specific NumberVal interface to satisfy TypeScript
   const l = (left as unknown as { value: number }).value;
   const r = (right as unknown as { value: number }).value;
   let result = false;
@@ -102,11 +101,36 @@ export function evaluate_identifier(identifier: Identifier, env: Environment): R
   return val;
 }
 
-export function evaluate_assignments(node: AssignmentExpr, env: Environment): RuntimeVal {
+export function evaluate_assignments(node: AssignmentExpr | AugmentedAssignmentExpr, env: Environment): RuntimeVal {
   if (node.assigne.kind !== "Identifier") {
     throw `Invalid Left-Hand Side inside assignment expression ${JSON.stringify(node.assigne)}`;
   }
   const varname = (node.assigne as Identifier).symbol;
+
+  if (node.kind === "AugmentedAssignmentExpr") {
+    const currentValue = env.lookupVar(varname);
+    const rightValue = evaluate(node.value, env);
+
+    if (currentValue.type !== "number" || rightValue.type !== "number") {
+      throw `Runtime Error: Augmented assignment requires numeric operands, got '${currentValue.type}' and '${rightValue.type}'`;
+    }
+
+    const leftNum = (currentValue as NumberVal).value;
+    const rightNum = (rightValue as NumberVal).value;
+    let result: number;
+
+    switch (node.operator) {
+      case "+=": result = leftNum + rightNum; break;
+      case "-=": result = leftNum - rightNum; break;
+      case "*=": result = leftNum * rightNum; break;
+      case "/=": result = leftNum / rightNum; break;
+      case "%=": result = leftNum % rightNum; break;
+      default: throw `Runtime Error: Unknown augmented operator '${node.operator}'`;
+    }
+
+    return env.assignVar(varname, MK_NUMBER(result));
+  }
+
   return env.assignVar(varname, evaluate(node.value, env));
 }
 
@@ -115,8 +139,6 @@ export function evaluate_object_expr(obj: ObjectLiteral, env: Environment): Runt
   for (const { key,value } of obj.properties ) {
 
     const runtimeVal = (value == undefined) ? env.lookupVar(key) : evaluate(value, env);
-    // Handles valid key: pair
-    
     object.properties.set(key, runtimeVal);
   }
   return object;
@@ -130,25 +152,23 @@ export function evaluate_call_expr(expr: CallExpr, env: Environment): RuntimeVal
     const result = (func as NativeFunctionValue).call(args, env);
     return result;
   }
-  
+
   if (func.type == "function") {
     const fn = func as FunctionValue;
     const scope = new Environment(fn.declarationEnv);
     for (let i = 0; i < fn.parameters.length; ++i) {
-      // TODO Check the bounds 
-      // verify arity of function
       const varname = fn.parameters[i];
       scope.declareVar(varname, args[i], false);
     }
       try {
         for (const stmt of fn.body) {
           evaluate(stmt, scope);
-      }
+        }
       } catch (e) {
         if (e instanceof ReturnSignal) return e.value;
         throw e;
       }
       return MK_NULL();
-    } 
+    }
     throw "Cannot call value that is not a function: " + JSON.stringify(func);
   }

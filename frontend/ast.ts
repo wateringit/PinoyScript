@@ -10,6 +10,7 @@ export type NodeType =
   // Expressions
   | "AssignmentExpr"
   | "MemberExpr"
+  | "AugmentedAssignmentExpr"
   | "CallExpr"
   // Literals
   | "Property"
@@ -122,4 +123,11 @@ export interface Property extends Expr {
 export interface ObjectLiteral extends Expr {
   kind: "ObjectLiteral";
   properties: Property[];
+}
+
+export interface AugmentedAssignmentExpr extends Expr {
+  kind: "AugmentedAssignmentExpr";
+  assigne: Expr;
+  operator: string;
+  value: Expr;
 }

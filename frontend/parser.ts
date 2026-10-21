@@ -1,4 +1,4 @@
-import { AssignmentExpr, BinaryExpr, CallExpr, Expr, ForStmt, FunctionDeclaration, Identifier, IfStmt, MemberExpr, NumericLiteral, ObjectLiteral, Program, Property, ReturnStmt, Stmt, StringLiteral, VarDeclaration, WhileStmt } from "./ast.ts";
+import { AssignmentExpr, AugmentedAssignmentExpr, BinaryExpr, CallExpr, Expr, ForStmt, FunctionDeclaration, Identifier, IfStmt, MemberExpr, NumericLiteral, ObjectLiteral, Program, Property, ReturnStmt, Stmt, StringLiteral, VarDeclaration, WhileStmt } from "./ast.ts";
 import { Token, tokenize, TokenType } from "./lexer.ts";
 
 
@@ -212,7 +212,17 @@ export default class Parser {
       const value = this.parse_assignment_expr();
       return { value, assigne: left, kind: "AssignmentExpr" } as AssignmentExpr;
     }
-
+    // Check for +=, -=, *=, /=
+    if (["+=", "-=", "*=", "/="].includes(this.at().value)) {
+      const operator = this.eat().value;
+      const value = this.parse_assignment_expr();
+      return {
+        kind: "AugmentedAssignmentExpr",
+        assigne: left,
+        operator,
+        value
+      } as AugmentedAssignmentExpr;
+    }
     return left;
   }
 

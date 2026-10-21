@@ -41,8 +41,45 @@ tlga a ay 20;
 - `-` to subtract
 - `*` to multiply
 - `/` to divide (floating point division)
+- `//` to perform integer division
 - `**` to exponetiate
 - `%` to perform modular arithmetic
+#### Comparison Operators
+- `==` for equality comparison
+- `>=` for greater than or equal to
+- `<=` for less than or equal to
+- `>` for greater than
+- `<` for less than
+- `!=` for not equal to
+### Conditionals
+- `kung` for if
+- `edi kung` for else if
+- `edi` for else
+
+Example:
+```ts
+kung (condition) {
+  // foo
+} edi kung (condition) {
+  // bar
+} edi {
+  // baz
+}
+```
+### Loops and Iteration
+- `habang` for `while` loops
+- `para` for `for` loops
+Example
+```ts
+habang (condition) {
+  // foo
+}
+para (si i = 0; i < 20; i = i + 1) {
+  // bar
+}
+```
+
+
 ## Built-in Functions
 
 Here is an example script in PinoyScript:

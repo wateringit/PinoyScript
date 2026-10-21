@@ -94,6 +94,14 @@ export function tokenize (sourceCode: string) : Token[] {
       tokens.push(token(src.shift(), TokenType.Comma));
     } else if (src[0] == ".") {
       tokens.push(token(src.shift(), TokenType.Dot));
+    } else if (src[0] == '"' || src[0] == "'") {
+      const quoteChar = src.shift(); // consume opening quote (either " or ')
+      let str = "";
+      while (src.length > 0 && src[0] !== quoteChar) {
+        str += src.shift();
+      }
+      src.shift(); // consume matching closing quote
+      tokens.push(token(str, TokenType.String));
     } else {
       // Handle multichar tokens
       if (isint(src[0])) {

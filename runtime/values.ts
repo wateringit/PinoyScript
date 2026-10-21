@@ -1,7 +1,7 @@
 import { Stmt } from "../frontend/ast.ts";
 import Environment from "./environment.ts";
 
-export type ValueType = "null" | "number" | "boolean" | "object" | "native-function" | "function";
+export type ValueType = "null" | "number" | "boolean" | "object" | "native-function" | "function" | "string";
 
 export interface RuntimeVal {
   type: ValueType;
@@ -28,6 +28,14 @@ export function MK_BOOL(b = true) {
 export interface NumberVal extends RuntimeVal {
   type: "number";
   value: number;
+}
+
+export interface StringVal extends RuntimeVal {
+  type: "string";
+  value: string;
+}
+export function MK_STRING(val: string) {
+  return { type: "string", value: val } as StringVal;
 }
 
 export function MK_NUMBER(n = 0) {

@@ -1,4 +1,4 @@
-import { AssignmentExpr, BinaryExpr, CallExpr, Expr, ForStmt, FunctionDeclaration, Identifier, MemberExpr, NumericLiteral, ObjectLiteral, Program, Property, ReturnStmt, Stmt, VarDeclaration, WhileStmt } from "./ast.ts";
+import { AssignmentExpr, BinaryExpr, CallExpr, Expr, ForStmt, FunctionDeclaration, Identifier, MemberExpr, NumericLiteral, ObjectLiteral, Program, Property, ReturnStmt, Stmt, StringLiteral, VarDeclaration, WhileStmt } from "./ast.ts";
 import { Token, tokenize, TokenType } from "./lexer.ts";
 
 
@@ -361,6 +361,11 @@ export default class Parser {
           value: parseFloat(this.eat().value) 
         } as NumericLiteral;
         
+      case TokenType.String:                                
+        return {                                             
+          kind: "StringLiteral",                
+          value: this.eat().value,                            
+        } as StringLiteral;
       case TokenType.OpenParen: {
         this.eat(); // eat open paren
         const value = this.parse_expr();

@@ -1,28 +1,51 @@
-import { AssignmentExpr, BinaryExpr, CallExpr, Identifier, ObjectLiteral } from "../../frontend/ast.ts";
+import { AssignmentExpr, BinaryExpr, CallExpr, Identifier, ObjectLiteral, StringLiteral } from "../../frontend/ast.ts";
 import Environment from "../environment.ts";
 import { evaluate } from "../interpreter.ts";
-import { FunctionValue, MK_NULL, NativeFunctionValue, NumberVal, ObjectVal, ReturnSignal, RuntimeVal } from "../values.ts";
+import { FunctionValue, MK_NULL, MK_NUMBER, MK_STRING, NativeFunctionValue, NumberVal, ObjectVal, ReturnSignal, RuntimeVal, StringVal } from "../values.ts";
 
-export function evaluate_numeric_binary_expr(lhs: NumberVal, rhs: NumberVal, operator: string,): NumberVal {
+export function evaluate_numeric_binary_expr(
+  lhs: RuntimeVal,
+  rhs: RuntimeVal,
+  operator: string,
+): RuntimeVal {
+  // Handle string concatenation if either side is a string value
+  if (operator === "+") {
+    if (lhs.type === "string" || rhs.type === "string") {
+      const leftVal = lhs.type === "string" ? (lhs as StringVal).value : String((lhs as NumberVal).value);
+      const rightVal = rhs.type === "string" ? (rhs as StringVal).value : String((rhs as NumberVal).value);
+      return MK_STRING(leftVal + rightVal);
+    }
+  }
+
+  // Ensure they are treated as numbers for math operations below
+  const numLhs = (lhs as NumberVal).value;
+  const numRhs = (rhs as NumberVal).value;
   let result: number;
+
   if (operator == "+") {
-    result = lhs.value + rhs.value;
+    result = numLhs + numRhs;
   } else if (operator == "-") {
-    result = lhs.value - rhs.value;
+    result = numLhs - numRhs;
   } else if (operator == "*") {
-    result = lhs.value * rhs.value;
+    result = numLhs * numRhs;
   } else if (operator == "/") {
-    // TODO: Division by zero checks
-    result = lhs.value / rhs.value;
+    result = numLhs / numRhs;
   } else if (operator == "**") {
-    result = lhs.value ** rhs.value;
+    result = numLhs ** numRhs;
   } else if (operator == "%") {
-    result = lhs.value % rhs.value;
+    result = numLhs % numRhs;
   } else {
     throw `Runtime Error: Unknown operator '${operator}' inside evaluate_numeric_binary_expr`;
   }
 
-  return { value: result, type: "number" };
+  return MK_NUMBER(result);
+}
+
+export function evaluate_string_expr(node: StringLiteral, _env: Environment): StringVal {
+  return {
+    value: node.value,
+    type: "string",
+  } as StringVal;
 }
 
 export function evaluate_binary_expr(
@@ -33,7 +56,7 @@ export function evaluate_binary_expr(
   if (["+", "-", "*", "/", "%", "**"].includes(binop.operator)) {
     const left = evaluate(binop.left, env);
     const right = evaluate(binop.right, env);
-    if (left.type === "number" && right.type === "number") {
+    if (left.type === "number" && right.type === "number" || (binop.operator === "+" && (left.type === "string" || right.type === "string"))) {
       return evaluate_numeric_binary_expr(left as NumberVal, right as NumberVal, binop.operator);
     }
     throw `Runtime Error: Arithmetic operations require numeric operands, got '${left.type}' and '${right.type}'`;

@@ -1,6 +1,6 @@
-import { AssignmentExpr, BinaryExpr, CallExpr, ForStmt, FunctionDeclaration, Identifier, NumericLiteral, ObjectLiteral, Program, ReturnStmt, Stmt, VarDeclaration, WhileStmt } from "../frontend/ast.ts";
+import { AssignmentExpr, BinaryExpr, CallExpr, ForStmt, FunctionDeclaration, Identifier, NumericLiteral, ObjectLiteral, Program, ReturnStmt, Stmt, StringLiteral, VarDeclaration, WhileStmt } from "../frontend/ast.ts";
 import Environment from "./environment.ts";
-import { evaluate_assignments, evaluate_binary_expr, evaluate_call_expr, evaluate_identifier, evaluate_object_expr } from "./eval/expressions.ts";
+import { evaluate_assignments, evaluate_binary_expr, evaluate_call_expr, evaluate_identifier, evaluate_object_expr, evaluate_string_expr } from "./eval/expressions.ts";
 import { evaluate_for_stmt, evaluate_function_declaration, evaluate_program, evaluate_return_stmt, evaluate_var_declaration, evaluate_while_stmt } from "./eval/statements.ts";
 import { NumberVal, RuntimeVal } from "./values.ts";
 
@@ -12,6 +12,8 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
         value: ((astNode as NumericLiteral).value), 
         type: "number", 
       } as NumberVal;
+    case "StringLiteral":
+      return evaluate_string_expr(astNode as StringLiteral, env);
     case "Identifier":
       return evaluate_identifier(astNode as Identifier, env);
     case "ObjectLiteral":
@@ -40,3 +42,4 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
       Deno.exit(0);
   }
 }
+

@@ -1,5 +1,14 @@
 import { BooleanVal, MK_BOOL, MK_NATIVE_FN, MK_NULL, MK_NUMBER, NativeFunction, NumberVal, RuntimeVal, StringVal } from './values.ts';
-
+// Output as a string
+// deno-lint-ignore no-explicit-any
+function stringification(val: any): string {
+    if (!val) return "null";
+    if (val.type === "number") return String(val.value);
+    if (val.type === "string") return val.value;
+    if (val.type === "boolean") return String(val.value);
+    if (val.type === "null") return "null";
+    return "[Object]";
+  }
 export function createGlobalEnv() {
   const env = new Environment;
   // Setup global environment
@@ -8,14 +17,20 @@ export function createGlobalEnv() {
   env.declareVar("wala", MK_NULL(), true);
 
   // Define a native built-in method
-  env.declareVar(
-    "sabi", 
-    MK_NATIVE_FN((args, _scope) => {
-      console.log(...args);
-      return MK_NULL(); 
-    }), 
-    true
-  );
+  env.declareVar("sabiln", MK_NATIVE_FN((args) => {
+    const encoder = new TextEncoder();
+    const output = args.map(arg => stringification(arg)).join(" ");
+    Deno.stdout.writeSync(encoder.encode(output + "\n"));
+    return MK_NULL();
+  }), true);
+
+  // Pure print (no newline)
+  env.declareVar("sabi", MK_NATIVE_FN((args) => {
+    const encoder = new TextEncoder();
+    const output = args.map(arg => stringification(arg)).join(" ");
+    Deno.stdout.writeSync(encoder.encode(output));
+    return MK_NULL();
+  }), true);
 
   function timeFunction(_args: RuntimeVal[], _env: Environment) {
     return MK_NUMBER(Date.now());

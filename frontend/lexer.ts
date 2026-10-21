@@ -102,10 +102,24 @@ export function tokenize (sourceCode: string) : Token[] {
       const quoteChar = src.shift(); // consume opening quote (either " or ')
       let str = "";
       while (src.length > 0 && src[0] !== quoteChar) {
-        str += src.shift();
-      }
-      src.shift(); // consume matching closing quote
-      tokens.push(token(str, TokenType.String));
+      const char = src.shift();
+      if (char === "\\") {
+        // Escape sequence detector
+        const nextChar = src.shift();
+        switch (nextChar) {
+          case "n": str += "\n"; break;   // Newline
+          case "t": str += "\t"; break;   // Tab
+          case "r": str += "\r"; break;   // Carriage return
+          case "\\": str += "\\"; break;  // Literal backslash
+          case quoteChar: str += quoteChar; break; // The quote itself
+          default: str += "\\" + nextChar; // Unknown escape, keep as is
+        }
+          } else {
+            str += char;
+          }
+        }
+        src.shift(); // consume matching closing quote
+        tokens.push(token(str, TokenType.String));
     } else {
       // Handle multichar tokens
       if (isint(src[0])) {

@@ -1,31 +1,26 @@
 import Parser from "./frontend/parser.ts";
 import { createGlobalEnv } from "./runtime/environment.ts";
 import { evaluate } from "./runtime/interpreter.ts";
-run("./test.txt");
-// repl();
+
 async function run(filename: string) {
   const parser = new Parser();
   const env = createGlobalEnv();
-  const input = await Deno.readTextFile(filename);
-  const program = parser.produceAST(input);
-  const result = evaluate(program, env);
-  console.log(result);
-
-}
-function repl () {
-  const parser = new Parser();
-  const env = createGlobalEnv();
-  console.log("\n REPL v1")
-  while (true) {
-    const input = prompt(">");
-    // Quits repl if exit keyword is typed or no input
-    if (!input || input.includes("exit")) {
-      Deno.exit(1)
-    }
-
+  try {
+    const input = await Deno.readTextFile(filename);
     const program = parser.produceAST(input);
-
-    const result = evaluate(program, env);
-    console.log(result);
+    evaluate(program, env);
+  } catch (error) {
+    console.error(`Error reading file '${filename}':`, error);
+    Deno.exit(1);
   }
+}
+
+// CLI Entry point
+if (import.meta.main) {
+  const args = Deno.args;
+  if (args.length === 0) {
+    console.log("Usage: pinoy <filename.pinoy>");
+    Deno.exit(1);
+  }
+  await run(args[0]);
 }

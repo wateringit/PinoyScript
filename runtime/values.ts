@@ -55,3 +55,7 @@ export interface FunctionValue extends RuntimeVal {
   declarationEnv: Environment;
   body: Stmt[];
 }
+
+export class ReturnSignal {
+  constructor(public value: RuntimeVal) {}
+}

@@ -1,4 +1,4 @@
-import { AssignmentExpr, BinaryExpr, CallExpr, Expr, FunctionDeclaration, Identifier, MemberExpr, NumericLiteral, ObjectLiteral, Program, Property, Stmt, VarDeclaration } from "./ast.ts";
+import { AssignmentExpr, BinaryExpr, CallExpr, Expr, ForStmt, FunctionDeclaration, Identifier, MemberExpr, NumericLiteral, ObjectLiteral, Program, Property, ReturnStmt, Stmt, VarDeclaration, WhileStmt } from "./ast.ts";
 import { Token, tokenize, TokenType } from "./lexer.ts";
 
 
@@ -49,6 +49,12 @@ export default class Parser {
         return this.parse_var_declaration();
       case TokenType.Fn:
         return this.parse_function_declaration();
+      case TokenType.Return:
+        return this.parse_return_stmt();
+      case TokenType.While:
+        return this.parse_while_stmt();
+      case TokenType.For:
+        return this.parse_for_stmt();
       default:
         return this.parse_expr()
     }
@@ -81,6 +87,60 @@ export default class Parser {
       kind: "FunctionDeclaration",
     } as FunctionDeclaration;
     return fn;
+  }
+
+  private parse_block(): Stmt[] {
+    this.expect(TokenType.OpenBrace, "Expected { to open block");
+    const body: Stmt[] = [];
+  while (this.not_eof() && this.at().type !== TokenType.CloseBrace) {
+    body.push(this.parse_stmt());
+  }
+    this.expect(TokenType.CloseBrace, "Expected } to close block");
+    return body;
+  }
+
+  private parse_while_stmt(): Stmt {
+    this.eat(); // 'habang'
+    this.expect(TokenType.OpenParen, "Expected ( after habang");
+    const condition = this.parse_expr();
+    this.expect(TokenType.CloseParen, "Expected ) after condition");
+    const body = this.parse_block();
+    return { kind: "WhileStmt", condition, body } as WhileStmt;
+  }
+
+  private parse_for_stmt(): Stmt {
+    this.eat(); // 'para'
+    this.expect(TokenType.OpenParen, "Expected ( after para");
+
+  // init: a declaration (si i ay 0;) or an expression
+    let init: Stmt | undefined;
+    if (this.at().type === TokenType.Let || this.at().type === TokenType.Const) {
+      init = this.parse_var_declaration(); // consumes its own ;
+    } else {
+      init = this.parse_expr();
+      this.expect(TokenType.Semicolon, "Expected ; after for init");
+    }
+
+    const condition = this.parse_expr();
+    this.expect(TokenType.Semicolon, "Expected ; after for condition");
+
+    const update = this.parse_expr();
+    this.expect(TokenType.CloseParen, "Expected ) after for clauses");
+
+    const body = this.parse_block();
+    return { kind: "ForStmt", init, condition, update, body } as ForStmt;
+  }
+
+  private parse_return_stmt(): Stmt {
+    this.eat(); // consume 'balik'
+
+    let value: Expr | undefined;
+    if (this.at().type !== TokenType.Semicolon && this.at().type !== TokenType.CloseBrace) {
+      value = this.parse_expr();
+    }
+
+    this.expect(TokenType.Semicolon, "Expected ; after balik");
+    return { kind: "ReturnStmt", value } as ReturnStmt;
   }
   private parse_var_declaration(): Stmt {
     const isConstant = this.eat().type == TokenType.Const;
@@ -120,7 +180,7 @@ export default class Parser {
 
   private parse_object_expr(): Expr {
     if (this.at().type !== TokenType.OpenBrace) {
-      return this.parse_additive_expr();
+      return this.parse_comparison_expr();
     }
 
     this.eat();
@@ -166,6 +226,17 @@ export default class Parser {
     }
 
     return left; 
+  }
+
+  private parse_comparison_expr(): Expr {
+    let left = this.parse_additive_expr();
+
+    while (["<", ">", "<=", ">=", "==", "!="].includes(this.at().value)) {
+      const operator = this.eat().value;
+      const right = this.parse_additive_expr();
+      left = { kind: "BinaryExpr", left, right, operator } as BinaryExpr;
+    }
+    return left;
   }
 
   private parse_multiplicative_expr (): Expr {

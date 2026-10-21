@@ -22,6 +22,8 @@ export enum TokenType {
   Let,
   Const,
   Fn,
+  While,
+  For,
 }
 
 const KEYWORDS: Record<string, TokenType> = {
@@ -30,6 +32,8 @@ const KEYWORDS: Record<string, TokenType> = {
   ay: TokenType.Equals,
   paraan: TokenType.Fn,
   balik: TokenType.Return,
+  habang: TokenType.While,
+  para: TokenType.For,
 };
 
 export interface Token {
@@ -76,9 +80,13 @@ export function tokenize (sourceCode: string) : Token[] {
       tokens.push(token(op, TokenType.BinaryOperator));
     } else if (src[0] == "+" || src[0] == "-" || src[0] == "*" || src[0] == "/" || src[0] == "%") {
       tokens.push(token(src.shift(), TokenType.BinaryOperator));
+    } else if ((src[0] == "<" || src[0] == ">" || src[0] == "!" || src[0] == "=") && src[1] == "=") {
+      tokens.push(token(src.shift()! + src.shift()!, TokenType.BinaryOperator));
+    } else if (src[0] == "<" || src[0] == ">") {
+      tokens.push(token(src.shift()!, TokenType.BinaryOperator));
     } else if (src[0] == "=") {
       tokens.push(token(src.shift(), TokenType.Equals));
-    } else if (src[0] == ";") {
+    } else if (src[0] == ";") { 
       tokens.push(token(src.shift(), TokenType.Semicolon));
     } else if (src[0] == ":") {
       tokens.push(token(src.shift(), TokenType.Colon));

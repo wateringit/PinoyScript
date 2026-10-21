@@ -4,6 +4,8 @@ export type NodeType =
   | "VarDeclaration"
   | "FunctionDeclaration"
   | "ReturnStmt"
+  | "WhileStmt"
+  | "ForStmt"
   // Expressions
   | "AssignmentExpr"
   | "MemberExpr"
@@ -43,6 +45,20 @@ export interface FunctionDeclaration extends Stmt {
 export interface ReturnStmt extends Stmt {
   kind: "ReturnStmt";
   value?: Expr; // Optional because someone can just write plain "balik"
+}
+
+export interface WhileStmt extends Stmt {
+  kind: "WhileStmt";
+  condition: Expr;
+  body: Stmt[];
+}
+
+export interface ForStmt extends Stmt {
+  kind: "ForStmt";
+  init?: Stmt;
+  condition?: Expr;
+  update?: Expr;
+  body: Stmt[];
 }
 
 export interface Expr extends Stmt {}

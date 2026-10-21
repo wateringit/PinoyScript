@@ -1,7 +1,7 @@
 import { AssignmentExpr, BinaryExpr, CallExpr, Identifier, ObjectLiteral } from "../../frontend/ast.ts";
 import Environment from "../environment.ts";
 import { evaluate } from "../interpreter.ts";
-import { FunctionValue, MK_NULL, NativeFunctionValue, NumberVal, ObjectVal, RuntimeVal } from "../values.ts";
+import { FunctionValue, MK_NULL, NativeFunctionValue, NumberVal, ObjectVal, ReturnSignal, RuntimeVal } from "../values.ts";
 
 export function evaluate_numeric_binary_expr(lhs: NumberVal, rhs: NumberVal, operator: string,): NumberVal {
   let result: number;
@@ -25,17 +25,52 @@ export function evaluate_numeric_binary_expr(lhs: NumberVal, rhs: NumberVal, ope
   return { value: result, type: "number" };
 }
 
-export function evaluate_binary_expr(binop: BinaryExpr, env: Environment): RuntimeVal {
-
-  const lhs = evaluate(binop.left, env);
-  const rhs = evaluate(binop.right, env);
-
-  if (lhs.type == "number" && rhs.type == "number") {
-    return evaluate_numeric_binary_expr(lhs as NumberVal, rhs as NumberVal, binop.operator);
+export function evaluate_binary_expr(
+  binop: BinaryExpr,
+  env: Environment,
+): RuntimeVal {
+  // Handle arithmetic & exponential operations
+  if (["+", "-", "*", "/", "%", "**"].includes(binop.operator)) {
+    const left = evaluate(binop.left, env);
+    const right = evaluate(binop.right, env);
+    if (left.type === "number" && right.type === "number") {
+      return evaluate_numeric_binary_expr(left as NumberVal, right as NumberVal, binop.operator);
+    }
+    throw `Runtime Error: Arithmetic operations require numeric operands, got '${left.type}' and '${right.type}'`;
   }
-  // One or both values are Null
-  return MK_NULL();
+
+  // Handle comparison operators returning booleans
+  if (["<", ">", "<=", ">=", "==", "!="].includes(binop.operator)) {
+    const left = evaluate(binop.left, env);
+    const right = evaluate(binop.right, env);
+    return evaluate_comparison_expr(left, right, binop.operator);
+  }
+
+  throw `Runtime Error: Unknown operator '${binop.operator}'`;
 }
+
+function evaluate_comparison_expr(
+  left: RuntimeVal,
+  right: RuntimeVal,
+  operator: string,
+): RuntimeVal {
+  // Cast to any or your specific NumberVal interface to satisfy TypeScript
+  const l = (left as unknown as { value: number }).value;
+  const r = (right as unknown as { value: number }).value;
+  let result = false;
+
+  switch (operator) {
+    case "<": result = l < r; break;
+    case ">": result = l > r; break;
+    case "<=": result = l <= r; break;
+    case ">=": result = l >= r; break;
+    case "==": result = l === r; break;
+    case "!=": result = l !== r; break;
+  }
+
+  return { type: "boolean", value: result } as RuntimeVal;
+}
+
 
 export function evaluate_identifier(identifier: Identifier, env: Environment): RuntimeVal {
   const val = env.lookupVar(identifier.symbol);
@@ -70,6 +105,7 @@ export function evaluate_call_expr(expr: CallExpr, env: Environment): RuntimeVal
     const result = (func as NativeFunctionValue).call(args, env);
     return result;
   }
+  
   if (func.type == "function") {
     const fn = func as FunctionValue;
     const scope = new Environment(fn.declarationEnv);
@@ -79,11 +115,15 @@ export function evaluate_call_expr(expr: CallExpr, env: Environment): RuntimeVal
       const varname = fn.parameters[i];
       scope.declareVar(varname, args[i], false);
     }
-    let result: RuntimeVal = MK_NULL();
-    for (const stmt of fn.body) {
-      result = evaluate(stmt, scope);
-    }
-    return result;
+      try {
+        for (const stmt of fn.body) {
+          evaluate(stmt, scope);
+      }
+      } catch (e) {
+        if (e instanceof ReturnSignal) return e.value;
+        throw e;
+      }
+      return MK_NULL();
+    } 
+    throw "Cannot call value that is not a function: " + JSON.stringify(func);
   }
-  throw "Cannot call value that is not a function: " + JSON.stringify(func);
-}

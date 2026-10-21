@@ -212,8 +212,8 @@ export default class Parser {
       const value = this.parse_assignment_expr();
       return { value, assigne: left, kind: "AssignmentExpr" } as AssignmentExpr;
     }
-    // Check for +=, -=, *=, /=
-    if (["+=", "-=", "*=", "/="].includes(this.at().value)) {
+    // Check for +=, -=, *=, /=, %=
+    if (["+=", "-=", "*=", "/=", "%="].includes(this.at().value)) {
       const operator = this.eat().value;
       const value = this.parse_assignment_expr();
       return {

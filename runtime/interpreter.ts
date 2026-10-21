@@ -1,7 +1,7 @@
-import { AssignmentExpr, BinaryExpr, CallExpr, ForStmt, FunctionDeclaration, Identifier, NumericLiteral, ObjectLiteral, Program, ReturnStmt, Stmt, StringLiteral, VarDeclaration, WhileStmt } from "../frontend/ast.ts";
+import { AssignmentExpr, BinaryExpr, CallExpr, ForStmt, FunctionDeclaration, Identifier, IfStmt, NumericLiteral, ObjectLiteral, Program, ReturnStmt, Stmt, StringLiteral, VarDeclaration, WhileStmt } from "../frontend/ast.ts";
 import Environment from "./environment.ts";
 import { evaluate_assignments, evaluate_binary_expr, evaluate_call_expr, evaluate_identifier, evaluate_object_expr, evaluate_string_expr } from "./eval/expressions.ts";
-import { evaluate_for_stmt, evaluate_function_declaration, evaluate_program, evaluate_return_stmt, evaluate_var_declaration, evaluate_while_stmt } from "./eval/statements.ts";
+import { evaluate_for_stmt, evaluate_function_declaration, evaluate_if_statement, evaluate_program, evaluate_return_stmt, evaluate_var_declaration, evaluate_while_stmt } from "./eval/statements.ts";
 import { NumberVal, RuntimeVal } from "./values.ts";
 
 
@@ -37,6 +37,8 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
       return evaluate_while_stmt(astNode as WhileStmt, env);
     case "ForStmt":
       return evaluate_for_stmt(astNode as ForStmt, env);
+    case "IfStmt":
+      return evaluate_if_statement(astNode as IfStmt, env);
     default:
       console.error("Unrecognized AST Node" , astNode);
       Deno.exit(0);

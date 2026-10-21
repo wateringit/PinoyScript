@@ -1,7 +1,7 @@
-import { ForStmt, FunctionDeclaration, Program, ReturnStmt, VarDeclaration, WhileStmt } from "../../frontend/ast.ts";
+import { ForStmt, FunctionDeclaration, IfStmt, Program, ReturnStmt, VarDeclaration, WhileStmt } from "../../frontend/ast.ts";
 import Environment from '../environment.ts';
 import { evaluate } from '../interpreter.ts';
-import { BooleanVal, FunctionValue, MK_NULL, NumberVal, ReturnSignal, RuntimeVal } from '../values.ts';
+import { BooleanVal, FunctionValue, MK_NULL, NumberVal, ReturnSignal, RuntimeVal, StringVal } from '../values.ts';
 
 export function evaluate_program(program: Program, env: Environment): RuntimeVal {
   let lastEvaluated: RuntimeVal = MK_NULL();
@@ -34,11 +34,7 @@ export function evaluate_return_stmt(stmt: ReturnStmt, env: Environment): Runtim
   throw new ReturnSignal(value);
 }
 
-function is_truthy(v: RuntimeVal): boolean {
-  if (v.type === "boolean") return (v as BooleanVal).value;
-  if (v.type === "number") return (v as NumberVal).value !== 0;
-  return v.type !== "null";
-}
+
 
 export function evaluate_while_stmt(stmt: WhileStmt, env: Environment): RuntimeVal {
   while (is_truthy(evaluate(stmt.condition, env))) {
@@ -58,4 +54,45 @@ export function evaluate_for_stmt(stmt: ForStmt, env: Environment): RuntimeVal {
     if (stmt.update) evaluate(stmt.update, loopEnv);
   }
   return MK_NULL();
+}
+
+export function evaluate_if_statement(
+  statement: IfStmt,
+  env: Environment,
+): RuntimeVal {
+  // Evaluate the condition expression
+  const condition = evaluate(statement.condition, env);
+
+  // Check condition truthiness
+  if (is_truthy(condition)) {
+    let result: RuntimeVal = MK_NULL();
+    for (const stmt of statement.body) {
+      result = evaluate(stmt, env);
+    }
+    return result;
+  } else if (statement.alternate) {
+    let result: RuntimeVal = MK_NULL();
+    for (const stmt of statement.alternate) {
+      result = evaluate(stmt, env);
+    }
+    return result;
+  }
+
+  return MK_NULL();
+}
+
+// Truthness Checker lol
+function is_truthy(val: RuntimeVal): boolean {
+  switch (val.type) {
+    case "boolean":
+      return (val as BooleanVal).value;
+    case "number":
+      return (val as NumberVal).value !== 0;
+    case "string":
+      return (val as StringVal).value !== "";
+    case "null":
+      return false;
+    default:
+      return true;
+  }
 }

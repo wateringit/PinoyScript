@@ -1,4 +1,4 @@
-import { AssignmentExpr, BinaryExpr, CallExpr, Expr, ForStmt, FunctionDeclaration, Identifier, MemberExpr, NumericLiteral, ObjectLiteral, Program, Property, ReturnStmt, Stmt, StringLiteral, VarDeclaration, WhileStmt } from "./ast.ts";
+import { AssignmentExpr, BinaryExpr, CallExpr, Expr, ForStmt, FunctionDeclaration, Identifier, IfStmt, MemberExpr, NumericLiteral, ObjectLiteral, Program, Property, ReturnStmt, Stmt, StringLiteral, VarDeclaration, WhileStmt } from "./ast.ts";
 import { Token, tokenize, TokenType } from "./lexer.ts";
 
 
@@ -51,14 +51,20 @@ export default class Parser {
         return this.parse_function_declaration();
       case TokenType.Return:
         return this.parse_return_stmt();
+      case TokenType.If:
+        return this.parse_if_stmt();
       case TokenType.While:
         return this.parse_while_stmt();
       case TokenType.For:
         return this.parse_for_stmt();
+      // deno-lint-ignore no-case-declarations
       default:
-        return this.parse_expr()
+        const expr =  this.parse_expr();
+        this.expect(TokenType.Semicolon, "Expected ';' after expression statement");
+        return expr;
     }
   }
+
   private parse_function_declaration(): Stmt {
     this.eat();
     const name = this.expect(TokenType.Identifier, "Expected function name following paraan keyword").value;
@@ -130,6 +136,38 @@ export default class Parser {
     const body = this.parse_block();
     return { kind: "ForStmt", init, condition, update, body } as ForStmt;
   }
+  private parse_if_stmt(): Stmt {
+      this.eat(); // Consume 'kung' 
+
+      this.expect(TokenType.OpenParen, "Expected '(' after 'kung'");
+      const condition = this.parse_expr();
+      this.expect(TokenType.CloseParen, "Expected ')' after condition");
+
+      const body = this.parse_block();
+
+      let alternate: Stmt[] | undefined;
+      if (this.at().type === TokenType.Else) {
+        this.eat();
+
+        // Support for "else if" (recursive call)
+        if (this.at().type === TokenType.If) {
+          const elseIf = this.parse_if_stmt() as IfStmt;
+          // We use the result of the nested IfStmt as the alternate
+          // To keep the AST simple, we can store it as a block of statements
+          alternate = [elseIf];
+        } else {
+          // Plain "else { ... }"
+          alternate = this.parse_block();
+        }
+      }
+
+      return {
+        kind: "IfStmt",
+        condition,
+        body,
+        alternate,
+      } as IfStmt;
+    }
 
   private parse_return_stmt(): Stmt {
     this.eat(); // consume 'balik'

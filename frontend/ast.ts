@@ -5,6 +5,7 @@ export type NodeType =
   | "FunctionDeclaration"
   | "ReturnStmt"
   | "WhileStmt"
+  | "IfStmt"
   | "ForStmt"
   // Expressions
   | "AssignmentExpr"
@@ -60,6 +61,13 @@ export interface ForStmt extends Stmt {
   condition?: Expr;
   update?: Expr;
   body: Stmt[];
+}
+
+export interface IfStmt extends Stmt {
+  kind: "IfStmt";
+  condition: Expr;
+  body: Stmt[];
+  alternate?: Stmt[]; 
 }
 
 export interface Expr extends Stmt {}

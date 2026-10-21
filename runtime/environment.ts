@@ -10,7 +10,7 @@ export function createGlobalEnv() {
   // Define a native built-in method
   env.declareVar(
     "sabi", 
-    MK_NATIVE_FN((args, scope) => {
+    MK_NATIVE_FN((args, _scope) => {
       console.log(...args);
       return MK_NULL(); 
     }), 

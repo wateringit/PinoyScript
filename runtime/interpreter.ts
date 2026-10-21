@@ -1,7 +1,7 @@
-import { AssignmentExpr, BinaryExpr, CallExpr, Identifier, NumericLiteral, ObjectLiteral, Program, Stmt, VarDeclaration } from "../frontend/ast.ts";
+import { AssignmentExpr, BinaryExpr, CallExpr, FunctionDeclaration, Identifier, NumericLiteral, ObjectLiteral, Program, Stmt, VarDeclaration } from "../frontend/ast.ts";
 import Environment from "./environment.ts";
 import { evaluate_assignments, evaluate_binary_expr, evaluate_call_expr, evaluate_identifier, evaluate_object_expr } from "./eval/expressions.ts";
-import { evaluate_program, evaluate_var_declaration } from "./eval/statements.ts";
+import { evaluate_function_declaration, evaluate_program, evaluate_var_declaration } from "./eval/statements.ts";
 import { NumberVal, RuntimeVal } from "./values.ts";
 
 
@@ -27,6 +27,8 @@ export function evaluate(astNode: Stmt, env: Environment): RuntimeVal {
     // Handle Statements
     case "VarDeclaration":
       return evaluate_var_declaration(astNode as VarDeclaration, env);
+    case "FunctionDeclaration":
+      return evaluate_function_declaration(astNode as FunctionDeclaration, env );
     default:
       console.error("Unrecognized AST Node" , astNode);
       Deno.exit(0);

@@ -16,16 +16,20 @@ export enum TokenType {
   OpenBracket,
   CloseBracket,
   BinaryOperator,
+  Return,
   EOF, // End of File
   // Keywords
   Let,
   Const,
+  Fn,
 }
 
 const KEYWORDS: Record<string, TokenType> = {
   si: TokenType.Let,
   tlga: TokenType.Const,
   ay: TokenType.Equals,
+  paraan: TokenType.Fn,
+  balik: TokenType.Return,
 };
 
 export interface Token {

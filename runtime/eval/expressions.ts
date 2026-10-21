@@ -1,7 +1,7 @@
 import { AssignmentExpr, BinaryExpr, CallExpr, Identifier, ObjectLiteral } from "../../frontend/ast.ts";
 import Environment from "../environment.ts";
 import { evaluate } from "../interpreter.ts";
-import { MK_NULL, NativeFunctionValue, NumberVal, ObjectVal, RuntimeVal } from "../values.ts";
+import { FunctionValue, MK_NULL, NativeFunctionValue, NumberVal, ObjectVal, RuntimeVal } from "../values.ts";
 
 export function evaluate_numeric_binary_expr(lhs: NumberVal, rhs: NumberVal, operator: string,): NumberVal {
   let result: number;
@@ -66,10 +66,24 @@ export function evaluate_call_expr(expr: CallExpr, env: Environment): RuntimeVal
   const args = expr.args.map((arg) => evaluate(arg, env));
   const func = evaluate(expr.caller, env);
 
-  if (func.type !== "native-function") {
-    throw "Cannot call value that is not a function: " + JSON.stringify(func);
+  if (func.type == "native-function") {
+    const result = (func as NativeFunctionValue).call(args, env);
+    return result;
   }
-
-  const result = (func as NativeFunctionValue).call(args, env);
-  return result;
+  if (func.type == "function") {
+    const fn = func as FunctionValue;
+    const scope = new Environment(fn.declarationEnv);
+    for (let i = 0; i < fn.parameters.length; ++i) {
+      // TODO Check the bounds 
+      // verify arity of function
+      const varname = fn.parameters[i];
+      scope.declareVar(varname, args[i], false);
+    }
+    let result: RuntimeVal = MK_NULL();
+    for (const stmt of fn.body) {
+      result = evaluate(stmt, scope);
+    }
+    return result;
+  }
+  throw "Cannot call value that is not a function: " + JSON.stringify(func);
 }

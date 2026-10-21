@@ -1,4 +1,4 @@
-import { MK_BOOL, MK_NULL, RuntimeVal } from './values.ts';
+import { MK_BOOL, MK_NATIVE_FN, MK_NULL, MK_NUMBER, NumberVal, RuntimeVal } from './values.ts';
 
 export function createGlobalEnv() {
   const env = new Environment;
@@ -6,6 +6,35 @@ export function createGlobalEnv() {
   env.declareVar("tama", MK_BOOL(true), true);
   env.declareVar("mali", MK_BOOL(false), false);
   env.declareVar("wala", MK_NULL(), true);
+
+  // Define a native built-in method
+  env.declareVar(
+    "sabi", 
+    MK_NATIVE_FN((args, scope) => {
+      console.log(...args);
+      return MK_NULL(); 
+    }), 
+    true
+  );
+
+  function timeFunction(_args: RuntimeVal[], _env: Environment) {
+    return MK_NUMBER(Date.now());
+  }
+  env.declareVar("oras", MK_NATIVE_FN(timeFunction), true);
+  function max(_args: RuntimeVal[], _env: Environment) {
+    const numbers = _args.map(arg => {
+        if (arg.type !== "number") {
+            throw new Error(`The pinakamalaki() function expects arguments of type number, got: ${arg.type}`);
+        }
+        return (arg as NumberVal).value; 
+    });
+    if (numbers.length === 0) {
+        return MK_NUMBER(-Infinity);
+    }
+    const result = Math.max(...numbers);
+    return MK_NUMBER(result);
+  }
+  env.declareVar("pinakamalaki", MK_NATIVE_FN(max), true);
   return env;
 }
 export default class Environment {

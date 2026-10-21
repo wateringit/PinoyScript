@@ -140,9 +140,25 @@ export default class Parser {
   }
 
   private parse_multiplicative_expr (): Expr {
-    let left = this.parse_call_member_expr();
+    let left = this.parse_exponential_expr();
 
     while (this.at().value == "*" || this.at().value == "/" || this.at().value == "%") {
+      const operator = this.eat().value;
+      const right = this.parse_exponential_expr();
+      left = {
+        kind: "BinaryExpr",
+        left,
+        right,
+        operator,
+      } as BinaryExpr;
+    }
+
+    return left; 
+  }
+  private parse_exponential_expr (): Expr {
+    let left = this.parse_call_member_expr();
+
+    while (this.at().value == "**") {
       const operator = this.eat().value;
       const right = this.parse_call_member_expr();
       left = {

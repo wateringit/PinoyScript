@@ -1,6 +1,2 @@
-si x ay numero(pasok("Binigyan ng age: "));
-kung (x >= 18) {
-  sabi("adult");
-} edi {
-  sabi("bata");
-}
+si num ay numero(pasok("What is your name? "));
+sabiln(num + 20);

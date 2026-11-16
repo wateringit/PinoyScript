@@ -94,7 +94,7 @@ export function createGlobalEnv() {
     }
   };
   
-  env.declareVar("bilang", toNumberFunc, true); // 'numero' = number
+  env.declareVar("numero", toNumberFunc, true); // 'numero' = number
   const toStrFunc: NativeFunction = {
     type: "native-function",
     call: (args: RuntimeVal[]) => {
